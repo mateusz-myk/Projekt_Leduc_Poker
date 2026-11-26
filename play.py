@@ -9,8 +9,6 @@ from .agents import AgentLosowy
 from .agent_mcts import AgentMCTS
 from .agent_reinforce import AgentReinforce
 
-TYPY_AGENTOW = ["losowy", "mcts", "reinforce"]
-
 #------------------------------------------------------------------------------------#
 
 def wyczysc_ekran():
@@ -145,10 +143,17 @@ def main():
     parser.add_argument("--mcts-seats", default="")
     parser.add_argument("--ai-seats", default="")  # stare: te miejsca = losowi, jesli nie przypisano inaczej
     parser.add_argument("--mcts-iters", type=int, default=1000)
+    parser.add_argument("--reinforce-seats", default="")
+    parser.add_argument("--heuristic-seats", default="")
     argumenty = parser.parse_args()
 
     przydzial = {}
-    for typ, tekst in [("losowy", argumenty.random_seats), ("mcts", argumenty.mcts_seats)]:
+    for typ, tekst in [
+    ("losowy", argumenty.random_seats),
+    ("mcts", argumenty.mcts_seats),
+    ("reinforce", argumenty.reinforce_seats),
+    ("heurystyczny", argumenty.heuristic_seats)
+]:
         for miejsce in wczytaj_miejsca_ai(tekst):
             if miejsce in przydzial:
                 parser.error(f"miejsce {miejsce} przypisane do dwoch typow agentow")

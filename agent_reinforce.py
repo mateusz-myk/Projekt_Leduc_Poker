@@ -1,12 +1,18 @@
 import random
 import torch
 import torch.nn as nn
-from torch.distributions import Categorical
-from .engine import SilnikGry
 
 AKCJE = ["fold", "call", "raise"]
+MAKS_PODBIC_W_RUNDZIE = 2
+ROZMIARY_ZAKLADOW = (2, 4)
+LICZBA_RANG = 3
+LICZBA_KOLOROW = 3
+ANTE = 1
 MAX_GRACZY = 3
-SKALA_WYPLAT = 13.0
+
+SKALA_WYPLAT = float(
+    ANTE + MAKS_PODBIC_W_RUNDZIE * sum(ROZMIARY_ZAKLADOW)
+)
 
 #------------------------------------------------------------------------------------#
 
@@ -58,7 +64,7 @@ def koduj_obserwacje(obs, legalne_akcje):
             x += hist[r][o]
     #Spłaszczamy tablicę do listy (2 × 3 × 3 = 18 liczb)
 
-    x += [podbicia_w_rundzie / 2.0]
+    x += [podbicia_w_rundzie / MAKS_PODBIC_W_RUNDZIE]
 
     x += [1.0 if a in legalne_akcje else 0.0 for a in AKCJE] # Trzy liczby mówiące, które akcje są legalne
     return torch.tensor(x, dtype=torch.float32)

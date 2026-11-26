@@ -5,6 +5,14 @@ from fractions import Fraction
 
 MAKS_PODBIC_W_RUNDZIE = 2
 ROZMIARY_ZAKLADOW = (2, 4)
+LICZBA_RANG = 3
+LICZBA_KOLOROW = 3
+ANTE = 1
+MAX_GRACZY = 3
+
+SKALA_WYPLAT = float(
+    ANTE + MAKS_PODBIC_W_RUNDZIE * sum(ROZMIARY_ZAKLADOW)
+)
 
 class Karta:
     def __init__(self, ranga, kolor):
@@ -43,8 +51,8 @@ class SilnikGry:
         self.liczba_graczy = liczba_graczy
         generator = random.Random(ziarno)
         talia = []
-        for ranga in range(3):
-            for kolor in range(3):
+        for ranga in range(LICZBA_RANG):
+            for kolor in range(LICZBA_KOLOROW):
                 talia.append(Karta(ranga, kolor))
         generator.shuffle(talia)
         self.karty_prywatne = talia[:liczba_graczy]
@@ -79,6 +87,13 @@ class SilnikGry:
     # wykonanie ruchu
     def wykonaj_ruch(self, akcja):
         gracz = self.aktualny
+
+        if self.koniec:
+            raise ValueError("Rozdanie jest zakonczone")
+
+        if akcja not in self.legalne_akcje(gracz):
+            raise ValueError("Nielegalna akcja")
+        
         self.historia.append((gracz, akcja, self.numer_rundy, self.do_wyrownania(gracz)))
 
         if akcja == "fold":
@@ -87,7 +102,7 @@ class SilnikGry:
             kwota = self.do_wyrownania(gracz)
             self.wplaty[gracz] += kwota
             self.pula += kwota
-        else: # raise
+        elif akcja == "raise":
             kwota = self.do_wyrownania(gracz) + self.rozmiar_zakladu
             self.wplaty[gracz] += kwota
             self.pula += kwota

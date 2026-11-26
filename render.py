@@ -2,6 +2,17 @@ SYMBOLE_KOLOROW = ["♡", "♧", "♢"]
 RANGI = "JQK"
 SZEROKOSC_EKRANU = 60
 
+MAKS_PODBIC_W_RUNDZIE = 2
+ROZMIARY_ZAKLADOW = (2, 4)
+LICZBA_RANG = 3
+LICZBA_KOLOROW = 3
+ANTE = 1
+MAX_GRACZY = 3
+
+SKALA_WYPLAT = float(
+    ANTE + MAKS_PODBIC_W_RUNDZIE * sum(ROZMIARY_ZAKLADOW)
+)
+
 #------------------------------------------------------------------------------------#
 
 def karta_kompaktowa(karta):
@@ -106,7 +117,7 @@ def rysuj_stol(obserwacja, gra, miejsca_ai, debug):
         akcje = f" [f] fold (0)   [c] call (+{do_wyrownania})"
     else:
         akcje = " [c] check (0)"
-    if gra.liczba_podbic < 2:
+    if gra.liczba_podbic < MAKS_PODBIC_W_RUNDZIE:
         akcje += f"   [r] raise (+{do_wyrownania + gra.rozmiar_zakladu})"
     linie.append(akcje)
     return "\n".join(linie)
