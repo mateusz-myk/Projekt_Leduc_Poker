@@ -3,7 +3,6 @@ import math
 import random
 from .engine import SilnikGry, Karta
 
-# do normalizacji nagrod do [-1, 1]
 SKALA_WYPLAT = 13.0
 
 #------------------------------------------------------------------------------------#
