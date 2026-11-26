@@ -20,7 +20,6 @@ from .render import (
 
 from .agents import AgentLosowy, AgentHeurystyczny
 from .agent_mcts import AgentMCTS
-from .agent_reinforce import AgentReinforce
 
 #------------------------------------------------------------------------------------#
 
@@ -49,6 +48,7 @@ def stworz_agenta(typ, ziarno, iteracje_mcts):
         return AgentMCTS(ziarno, iteracje_mcts)
 
     if typ == "reinforce":
+        from .agent_reinforce import AgentReinforce
         return AgentReinforce(ziarno, "reinforce.pt")
 
     if typ == "heurystyczny":
