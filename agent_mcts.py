@@ -40,6 +40,8 @@ class AgentMCTS:
         self.liczba_iteracji = liczba_iteracji
         self.stala_c = stala_c
 
+    #------------------------------------------------------------------------------------#
+
     def wybierz_akcje(self, obserwacja, legalne_akcje):
         if len(legalne_akcje) == 1:
             return legalne_akcje[0]
@@ -59,6 +61,8 @@ class AgentMCTS:
                 najlepsza = akcja
         return najlepsza
 
+    #------------------------------------------------------------------------------------#
+
     # stan gry odtworzony z historii (karty to na razie atrapy)
     def _odtworz_stan(self, obserwacja):
         gra = SilnikGry(0, len(obserwacja.wplaty))
@@ -67,6 +71,8 @@ class AgentMCTS:
         for gracz, akcja, runda, do_wyrownania in obserwacja.historia:
             gra.wykonaj_ruch(akcja)
         return gra
+
+    #------------------------------------------------------------------------------------#
 
     # losowe rozdanie ukrytych kart zgodne z tym co widzi agent
     def _determinizuj(self, baza, obserwacja):
@@ -98,6 +104,8 @@ class AgentMCTS:
         if obserwacja.karta_wspolna is None:
             gra.ukryta_karta = Karta(*talia[indeks])
         return gra
+
+    #------------------------------------------------------------------------------------#
 
     # jedna iteracja: selekcja -> ekspansja -> symulacja -> propagacja wsteczna
     def _iteracja(self, korzen, gra):
@@ -146,6 +154,8 @@ class AgentMCTS:
             wpis[0] += 1
             wpis[1] += float(gra.wyplaty[gracz]) / SKALA_WYPLAT
 
+    #------------------------------------------------------------------------------------#
+
     def _wybierz_ucb(self, statystyki, legalne):
         lacznie = sum(statystyki[a][0] for a in legalne)
         najlepsza = None
@@ -157,3 +167,5 @@ class AgentMCTS:
                 najlepsza_wartosc = wartosc
                 najlepsza = akcja
         return najlepsza
+
+#------------------------------------------------------------------------------------#

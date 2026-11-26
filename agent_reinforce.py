@@ -111,10 +111,14 @@ def maska(legalne_akcje):
 class SiecPolitykiBaseline(nn.Module):
     def __init__(self, wymiar_wejscia, ukryte=128):
         super().__init__()
+
         self.pien = nn.Sequential(
-            nn.Linear(wymiar_wejscia, ukryte), nn.ReLU(),
-            nn.Linear(ukryte, ukryte), nn.ReLU(),
+            nn.Linear(wymiar_wejscia, ukryte),
+            nn.ReLU(),
+            nn.Linear(ukryte, ukryte),
+            nn.ReLU()
         )
+
         self.glowa_polityki = nn.Linear(ukryte, len(AKCJE))
         self.glowa_wartosci = nn.Linear(ukryte, 1)
 
@@ -122,11 +126,12 @@ class SiecPolitykiBaseline(nn.Module):
         h = self.pien(x)
         logity = self.glowa_polityki(h)
         logity = logity.masked_fill(~maska_legalnych, -1e9)
+
         return logity, self.glowa_wartosci(h).squeeze(-1)
 
 # Sieć neuronowa z jednym wspólnym "pniem" 
 # (dwie warstwy ukryte po 128 neuronów z ReLU), 
-# z którego wychodzą dwie głowy: polityk (3 dla fold/call/raise) i **wartości** 
+# z którego wychodzą dwie głowy: polityk (3 dla fold/call/raise) i wartości
 
 #W forward nielegale akcje są zastępowane przez -1e9, 
 # więc po softmaxie mają prawdopodobieństwo 0 i agent ich nigdy nie wybierze. 
@@ -155,3 +160,5 @@ class AgentReinforce:
                 return AKCJE[int(torch.argmax(logity))]
             probs = torch.softmax(logity, dim=-1).tolist()
         return self.generator.choices(AKCJE, weights=probs)[0]
+
+#------------------------------------------------------------------------------------#

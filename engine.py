@@ -85,6 +85,8 @@ class SilnikGry:
         self.koniec = False
         self.wyplaty = None
 
+    #------------------------------------------------------------------------------------#
+
     # co moze zagrac gracz
     def legalne_akcje(self, id_gracza):
         akcje = ["call"]
@@ -93,6 +95,8 @@ class SilnikGry:
         if self.liczba_podbic < MAKS_PODBIC_W_RUNDZIE:
             akcje.append("raise")
         return akcje
+
+    #------------------------------------------------------------------------------------#
 
     def obserwuj(self, id_gracza):
         return Obserwacja(
@@ -106,6 +110,8 @@ class SilnikGry:
             self.historia.copy(),
             self.aktualny
         )
+
+    #------------------------------------------------------------------------------------#
 
     # wykonanie ruchu
     def wykonaj_ruch(self, akcja):
@@ -165,12 +171,16 @@ class SilnikGry:
         else:
             self.aktualny = self.nastepny_gracz(aktywni)
 
+    #------------------------------------------------------------------------------------#
+
     # nastepny aktywny gracz ktory jeszcze nie zagral
     def nastepny_gracz(self, aktywni):
         for przesuniecie in range(1, self.liczba_graczy + 1):
             kandydat = (self.aktualny + przesuniecie) % self.liczba_graczy
             if kandydat in aktywni and kandydat not in self.zagrali:
                 return kandydat
+
+    #------------------------------------------------------------------------------------#
 
     # wygrywa para ze wspolna karta, potem wyzsza ranga
     def zwyciezcy(self, aktywni):
@@ -188,6 +198,8 @@ class SilnikGry:
                 wygrani.append(i)
         return wygrani
 
+    #------------------------------------------------------------------------------------#
+
     # podzial puli
     def zakoncz_rozdanie(self, zwyciezcy):
         udzial = Fraction(self.pula, len(zwyciezcy))
@@ -200,6 +212,8 @@ class SilnikGry:
         self.wyplaty = wyplaty
         self.koniec = True
 
+    #------------------------------------------------------------------------------------#
+
     def najwyzsza_wplata(self):
         najwyzsza = 0
         for i in range(self.liczba_graczy):
@@ -207,10 +221,16 @@ class SilnikGry:
                 najwyzsza = self.wplaty[i]
         return najwyzsza
 
+    #------------------------------------------------------------------------------------#
+
     def do_wyrownania(self, id_gracza):
         return self.najwyzsza_wplata() - self.wplaty[id_gracza]
+
+    #------------------------------------------------------------------------------------#
 
     def gracz_na_ruchu(self):
         if self.koniec:
             return None
         return self.aktualny
+
+    #------------------------------------------------------------------------------------#

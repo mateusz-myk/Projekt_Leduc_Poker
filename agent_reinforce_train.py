@@ -18,6 +18,8 @@ from .agent_reinforce import (
     maska
 )
 
+#------------------------------------------------------------------------------------#
+
 def rozegraj_rozdanie(siec, n, ziarno):
     gra = SilnikGry(ziarno, n)
     kroki = [[] for _ in range(n)]          # na gracza: (log_prob, entropia, wartosc)
@@ -46,6 +48,8 @@ def rozegraj_rozdanie(siec, n, ziarno):
 # czyli różnica między rzeczywistą wypłatą a wartością baseline'u.
 # Dodatnia przewaga sprzyja zwiększeniu prawdopodobieństwa
 # wybranej akcji, a ujemna jego zmniejszeniu.
+
+#------------------------------------------------------------------------------------#
 
 def trenuj(liczba_batchy=5000, rozdan_w_batchu=64, lr=1e-3,
     beta=0.01, zakres_graczy=(MIN_GRACZY, MAX_GRACZY),
@@ -110,5 +114,9 @@ def trenuj(liczba_batchy=5000, rozdan_w_batchu=64, lr=1e-3,
 # Adam robi sam krok, a co 100 batchy kod wypisuje postęp i zapisuje model
 # w przewadze sprawia, że ta część straty nie psuje głowy wartości, tylko uczy politykę.
 
+#------------------------------------------------------------------------------------#
+
 if __name__ == "__main__":
     trenuj()
+
+#------------------------------------------------------------------------------------#
