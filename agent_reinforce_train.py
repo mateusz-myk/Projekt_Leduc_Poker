@@ -1,5 +1,6 @@
 import random
 import torch
+from tqdm import tqdm
 
 from torch.distributions import Categorical
 
@@ -59,7 +60,9 @@ def trenuj(liczba_batchy=5000, rozdan_w_batchu=64, lr=1e-3,
     siec = SiecPolitykiBaseline(wymiar)
     opt = torch.optim.Adam(siec.parameters(), lr=lr)
 
-    for batch in range(liczba_batchy):
+    pasek = tqdm(range(liczba_batchy),desc="Trening REINFORCE",unit="batch") # do estymowania długości treningu
+
+    for batch in pasek:
         n = rng.randint(*zakres_graczy)     # zmienna liczba graczy
         strata_pol, strata_wart, entropia, liczba_krokow = 0.0, 0.0, 0.0, 0
         for _ in range(rozdan_w_batchu):
@@ -80,10 +83,16 @@ def trenuj(liczba_batchy=5000, rozdan_w_batchu=64, lr=1e-3,
         torch.nn.utils.clip_grad_norm_(siec.parameters(), 1.0)
         opt.step()
 
+        pasek.set_postfix(
+            strata=f"{strata.detach().item():.4f}",
+            entropia=f"{entropia.detach().item()/liczba_krokow:.3f}"
+        )
+
         if batch % 100 == 0:
-            print(f"batch {batch}  strata {float(strata):.4f}  "
-                  f"entropia {float(entropia)/liczba_krokow:.3f}")
-            torch.save({"wymiar": wymiar, "wagi": siec.state_dict()}, sciezka)
+            torch.save({
+                "wymiar": wymiar,
+                "wagi": siec.state_dict()
+            }, sciezka)
 
     torch.save({"wymiar": wymiar, "wagi": siec.state_dict()}, sciezka)
 
