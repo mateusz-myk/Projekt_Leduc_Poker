@@ -1,17 +1,11 @@
+from .engine import (
+    MAKS_PODBIC_W_RUNDZIE,
+    LICZBA_RUND
+)
+
 SYMBOLE_KOLOROW = ["♡", "♧", "♢"]
 RANGI = "JQK"
 SZEROKOSC_EKRANU = 60
-
-MAKS_PODBIC_W_RUNDZIE = 2
-ROZMIARY_ZAKLADOW = (2, 4)
-LICZBA_RANG = 3
-LICZBA_KOLOROW = 3
-ANTE = 1
-MAX_GRACZY = 3
-
-SKALA_WYPLAT = float(
-    ANTE + MAKS_PODBIC_W_RUNDZIE * sum(ROZMIARY_ZAKLADOW)
-)
 
 #------------------------------------------------------------------------------------#
 
@@ -40,7 +34,7 @@ def historia_tekst(gra, miejsca_ai):
     if len(gra.historia) == 0:
         return ["  (brak akcji)"]
     wynik = []
-    for numer_rundy in [1, 2]:
+    for numer_rundy in range(1, LICZBA_RUND + 1):
         opisy = []
         for id_gracza, akcja, runda, do_wyrownania in gra.historia:
             if runda != numer_rundy:
@@ -71,8 +65,12 @@ def rysuj_stol(obserwacja, gra, miejsca_ai, debug):
     karta_gracza = rysuj_karte(obserwacja.karta_prywatna).split("\n")
     linie = []
     linie.append("=" * SZEROKOSC_EKRANU)
-    linie.append(f" LEDUC | R{obserwacja.numer_rundy}/2 | Zaklad {gra.rozmiar_zakladu} | "
-                 f"Pula {obserwacja.pula} | Podbicia: {gra.liczba_podbic}/2")
+    linie.append(
+        f" LEDUC | R{obserwacja.numer_rundy}/{LICZBA_RUND} | "
+        f"Zaklad {gra.rozmiar_zakladu} | "
+        f"Pula {obserwacja.pula} | "
+        f"Podbicia: {gra.liczba_podbic}/{MAKS_PODBIC_W_RUNDZIE}"
+    )
     linie.append("=" * SZEROKOSC_EKRANU)
     linie.append(" KARTA WSPOLNA          TWOJA KARTA (Gracz " + str(obserwacja.id_gracza) + ")")
     for i in range(5):

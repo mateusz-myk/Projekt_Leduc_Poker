@@ -1,9 +1,21 @@
 import random
 import torch
-from .engine import SilnikGry
-from .agents import AgentLosowy
-from .agent_reinforce import (SiecPolitykiBaseline, koduj_obserwacje, maska, AKCJE, SKALA_WYPLAT)
+
 from torch.distributions import Categorical
+
+from .engine import (
+    SilnikGry,
+    MIN_GRACZY,
+    MAX_GRACZY,
+    AKCJE,
+    SKALA_WYPLAT
+)
+
+from .agent_reinforce import (
+    SiecPolitykiBaseline,
+    koduj_obserwacje,
+    maska
+)
 
 def rozegraj_rozdanie(siec, n, ziarno):
     gra = SilnikGry(ziarno, n)
@@ -33,13 +45,15 @@ def rozegraj_rozdanie(siec, n, ziarno):
 # wygrał, to wszystkie jego decyzje z tego rozdania stają się trochę bardziej prawdopodobne, a jeśli przegrał,
 # trochę mniej.
 
-def trenuj(liczba_batchy=5000, rozdan_w_batchu=64, lr=1e-3, beta=0.01,
-           zakres_graczy=(2, 3), sciezka="reinforce.pt", ziarno=0):
+def trenuj(liczba_batchy=5000, rozdan_w_batchu=64, lr=1e-3,
+    beta=0.01, zakres_graczy=(MIN_GRACZY, MAX_GRACZY),
+    sciezka="reinforce.pt", ziarno=0
+):
     rng = random.Random(ziarno)
     torch.manual_seed(ziarno)
 
     # wymiar wejscia z przykladowego stanu
-    gra0 = SilnikGry(0, 3)
+    gra0 = SilnikGry(0, MAX_GRACZY)
     wymiar = len(koduj_obserwacje(gra0.obserwuj(0), gra0.legalne_akcje(0)))
     siec = SiecPolitykiBaseline(wymiar)
     opt = torch.optim.Adam(siec.parameters(), lr=lr)

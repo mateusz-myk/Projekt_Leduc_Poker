@@ -2,10 +2,23 @@ import argparse
 import os
 import sys
 import random
+
 from fractions import Fraction
-from .engine import SilnikGry
-from .render import rysuj_stol, rysuj_showdown, rysuj_przekazanie, formatuj_wyplate
-from .agents import AgentLosowy
+
+from .engine import (
+    SilnikGry,
+    MIN_GRACZY,
+    MAX_GRACZY
+)
+
+from .render import (
+    rysuj_stol,
+    rysuj_showdown,
+    rysuj_przekazanie,
+    formatuj_wyplate
+)
+
+from .agents import AgentLosowy, AgentHeurystyczny
 from .agent_mcts import AgentMCTS
 from .agent_reinforce import AgentReinforce
 
@@ -31,10 +44,16 @@ def wczytaj_miejsca_ai(tekst):
 def stworz_agenta(typ, ziarno, iteracje_mcts):
     if typ == "losowy":
         return AgentLosowy(ziarno)
+
     if typ == "mcts":
         return AgentMCTS(ziarno, iteracje_mcts)
+
     if typ == "reinforce":
         return AgentReinforce(ziarno, "reinforce.pt")
+
+    if typ == "heurystyczny":
+        return AgentHeurystyczny()
+
     raise ValueError(f"nieznany typ agenta: {typ}")
 
 #------------------------------------------------------------------------------------#
@@ -134,7 +153,7 @@ def graj(liczba_graczy, ziarno, debug, przydzial, ziarno_agentow, bez_pauz, iter
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--players", type=int, choices=[2, 3], default=3)
+    parser.add_argument("--players", type=int, choices=range(MIN_GRACZY, MAX_GRACZY + 1), default=MAX_GRACZY)
     parser.add_argument("--seed", dest="ziarno", type=int, default=None)
     parser.add_argument("--agent-seed", dest="ziarno_agentow", type=int, default=None)
     parser.add_argument("--no-pause", dest="bez_pauz", action="store_true")

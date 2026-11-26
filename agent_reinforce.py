@@ -2,16 +2,13 @@ import random
 import torch
 import torch.nn as nn
 
-AKCJE = ["fold", "call", "raise"]
-MAKS_PODBIC_W_RUNDZIE = 2
-ROZMIARY_ZAKLADOW = (2, 4)
-LICZBA_RANG = 3
-LICZBA_KOLOROW = 3
-ANTE = 1
-MAX_GRACZY = 3
-
-SKALA_WYPLAT = float(
-    ANTE + MAKS_PODBIC_W_RUNDZIE * sum(ROZMIARY_ZAKLADOW)
+from .engine import (
+    AKCJE,
+    LICZBA_RANG,
+    LICZBA_RUND,
+    MAX_GRACZY,
+    MAKS_PODBIC_W_RUNDZIE,
+    SKALA_WYPLAT
 )
 
 #------------------------------------------------------------------------------------#
@@ -21,52 +18,82 @@ def koduj_obserwacje(obs, legalne_akcje):
     ja = obs.id_gracza
     x = []
 
-    # moja karta i karta wspolna
-    x += [1.0 if obs.karta_prywatna.ranga == r else 0.0 for r in range(3)] 
-    # Rangi to 0, 1, 2 (J, Q, K), więc np. dla damy dostaję [0, 1, 0]. 
-    # jest to lepsze niż jedna liczba 0/1/2, bo 
-    # (sieć nie zakłada że Q jest “w połowie drogi” między J i K)
+    # moja karta
+    x += [
+        1.0 if obs.karta_prywatna.ranga == r else 0.0
+        for r in range(LICZBA_RANG)
+    ]
 
+    # karta wspolna i informacja o parze
     if obs.karta_wspolna is None:
-        x += [0.0, 0.0, 0.0]
+        x += [0.0] * LICZBA_RANG
         para = 0.0
     else:
-        x += [1.0 if obs.karta_wspolna.ranga == r else 0.0 for r in range(3)]
-        para = 1.0 if obs.karta_wspolna.ranga == obs.karta_prywatna.ranga else 0.0
+        x += [
+            1.0 if obs.karta_wspolna.ranga == r else 0.0
+            for r in range(LICZBA_RANG)
+        ]
+
+        para = float(
+            obs.karta_wspolna.ranga == obs.karta_prywatna.ranga
+        )
+
     x += [para]
-    x += [1.0 if obs.numer_rundy == 2 else 0.0] # numer rundy
+    x += [1.0 if obs.numer_rundy == 2 else 0.0]
 
     # liczba graczy i moja pozycja
-    x += [n / MAX_GRACZY] # furtka na przyszłość
-    x += [1.0 if ja == i else 0.0 for i in range(MAX_GRACZY)] # [1.0, 0.0, 0.0]
+    x += [n / MAX_GRACZY]
+    x += [
+        1.0 if ja == i else 0.0
+        for i in range(MAX_GRACZY)
+    ]
 
-    # pula, do wyrownania
-    x += [obs.pula / SKALA_WYPLAT, obs.do_wyrownania() / SKALA_WYPLAT]
+    # pula i kwota do wyrownania
+    x += [
+        obs.pula / SKALA_WYPLAT,
+        obs.do_wyrownania() / SKALA_WYPLAT
+    ]
 
-    # wplaty i foldy – wzgledem mnie (offset 0 = ja, 1 = nastepny...), padding zerami
+    # wplaty i foldy wzgledem mojej pozycji
     wplaty = [0.0] * MAX_GRACZY
     foldy = [0.0] * MAX_GRACZY
+
     for p in range(n):
-        off = (p - ja) % n # 0 to ja, 1 to po lewej, 2 to po prawej
+        off = (p - ja) % n
         wplaty[off] = obs.wplaty[p] / SKALA_WYPLAT
         foldy[off] = 1.0 if obs.spasowali[p] else 0.0
+
     x += wplaty + foldy
 
-    # historia: liczniki akcji [runda][offset gracza][fold/call/raise]
-    hist = [[[0.0] * 3 for _ in range(MAX_GRACZY)] for _ in range(2)] # 2 rundy × 3 graczy × 3 akcje,
+    # historia: [runda][offset gracza][akcja]
+    hist = [
+        [
+            [0.0] * len(AKCJE)
+            for _ in range(MAX_GRACZY)
+        ]
+        for _ in range(LICZBA_RUND)
+    ]
+
     podbicia_w_rundzie = 0
+
     for gracz, akcja, runda, _ in obs.historia:
         hist[runda - 1][(gracz - ja) % n][AKCJE.index(akcja)] += 1.0
+
         if runda == obs.numer_rundy and akcja == "raise":
             podbicia_w_rundzie += 1
-    for r in range(2):
+
+    for r in range(LICZBA_RUND):
         for o in range(MAX_GRACZY):
             x += hist[r][o]
-    #Spłaszczamy tablicę do listy (2 × 3 × 3 = 18 liczb)
 
     x += [podbicia_w_rundzie / MAKS_PODBIC_W_RUNDZIE]
 
-    x += [1.0 if a in legalne_akcje else 0.0 for a in AKCJE] # Trzy liczby mówiące, które akcje są legalne
+    # maska legalnych akcji
+    x += [
+        1.0 if a in legalne_akcje else 0.0
+        for a in AKCJE
+    ]
+
     return torch.tensor(x, dtype=torch.float32)
 
 #zamienia to, co widzi jeden gracz, na stały wektor liczb dla sieci
@@ -88,7 +115,7 @@ class SiecPolitykiBaseline(nn.Module):
             nn.Linear(wymiar_wejscia, ukryte), nn.ReLU(),
             nn.Linear(ukryte, ukryte), nn.ReLU(),
         )
-        self.glowa_polityki = nn.Linear(ukryte, 3)
+        self.glowa_polityki = nn.Linear(ukryte, len(AKCJE))
         self.glowa_wartosci = nn.Linear(ukryte, 1)
 
     def forward(self, x, maska_legalnych):

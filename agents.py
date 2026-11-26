@@ -2,7 +2,6 @@ import random
 
 #------------------------------------------------------------------------------------#
 
-# agent ktory gra calkiem losowo
 class AgentLosowy:
     def __init__(self, ziarno):
         self.generator = random.Random(ziarno)
@@ -12,7 +11,6 @@ class AgentLosowy:
 
 #------------------------------------------------------------------------------------#
 
-# agent heurystyczny do testów
 class AgentHeurystyczny:
     def wybierz_akcje(self, obserwacja, legalne_akcje):
         ranga = obserwacja.karta_prywatna.ranga
@@ -26,9 +24,6 @@ class AgentHeurystyczny:
         if para:
             if "raise" in legalne_akcje:
                 return "raise"
-            return "call"
-
-        if ranga == 2:
             return "call"
 
         if ranga == 0 and "fold" in legalne_akcje:

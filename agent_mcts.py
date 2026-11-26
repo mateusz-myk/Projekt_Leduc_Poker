@@ -1,9 +1,14 @@
 import copy
 import math
 import random
-from .engine import SilnikGry, Karta
 
-SKALA_WYPLAT = 13.0
+from .engine import (
+    SilnikGry,
+    Karta,
+    LICZBA_RANG,
+    LICZBA_KOLOROW,
+    SKALA_WYPLAT
+)
 
 #------------------------------------------------------------------------------------#
 
@@ -25,6 +30,12 @@ class _Wezel:
 # wiec jego decyzja moze zalezec tylko od jego karty).
 class AgentMCTS:
     def __init__(self, ziarno, liczba_iteracji=1000, stala_c=0.5):
+        if liczba_iteracji < 1:
+            raise ValueError("Liczba iteracji musi byc dodatnia")
+
+        if stala_c < 0:
+            raise ValueError("Stala eksploracji nie moze byc ujemna")
+
         self.generator = random.Random(ziarno)
         self.liczba_iteracji = liczba_iteracji
         self.stala_c = stala_c
@@ -63,8 +74,8 @@ class AgentMCTS:
         if obserwacja.karta_wspolna is not None:
             znane.append((obserwacja.karta_wspolna.ranga, obserwacja.karta_wspolna.kolor))
         talia = []
-        for ranga in range(3):
-            for kolor in range(3):
+        for ranga in range(LICZBA_RANG):
+            for kolor in range(LICZBA_KOLOROW):
                 if (ranga, kolor) not in znane:
                     talia.append((ranga, kolor))
         self.generator.shuffle(talia)

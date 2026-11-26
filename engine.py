@@ -3,16 +3,24 @@ from fractions import Fraction
 
 #------------------------------------------------------------------------------------#
 
-MAKS_PODBIC_W_RUNDZIE = 2
-ROZMIARY_ZAKLADOW = (2, 4)
 LICZBA_RANG = 3
 LICZBA_KOLOROW = 3
-ANTE = 1
+
+MIN_GRACZY = 2
 MAX_GRACZY = 3
+
+ANTE = 1
+MAKS_PODBIC_W_RUNDZIE = 2
+ROZMIARY_ZAKLADOW = (2, 4)
+LICZBA_RUND = len(ROZMIARY_ZAKLADOW)
+
+AKCJE = ["fold", "call", "raise"]
 
 SKALA_WYPLAT = float(
     ANTE + MAKS_PODBIC_W_RUNDZIE * sum(ROZMIARY_ZAKLADOW)
 )
+
+#------------------------------------------------------------------------------------#
 
 class Karta:
     def __init__(self, ranga, kolor):
@@ -47,19 +55,26 @@ class Obserwacja:
 
 class SilnikGry:
     # nowe rozdanie
-    def __init__(self, ziarno=0, liczba_graczy=3):
+    def __init__(self, ziarno=0, liczba_graczy=MAX_GRACZY):
+        if not MIN_GRACZY <= liczba_graczy <= MAX_GRACZY:
+            raise ValueError("Nieprawidlowa liczba graczy")
+
         self.liczba_graczy = liczba_graczy
         generator = random.Random(ziarno)
+
         talia = []
         for ranga in range(LICZBA_RANG):
             for kolor in range(LICZBA_KOLOROW):
                 talia.append(Karta(ranga, kolor))
+
         generator.shuffle(talia)
+
         self.karty_prywatne = talia[:liczba_graczy]
         self.karta_wspolna = None
         self.ukryta_karta = talia[liczba_graczy]
-        self.wplaty = [1] * liczba_graczy
-        self.pula = liczba_graczy
+
+        self.wplaty = [ANTE] * liczba_graczy
+        self.pula = ANTE * liczba_graczy
         self.spasowali = [False] * liczba_graczy
         self.numer_rundy = 1
         self.rozmiar_zakladu = ROZMIARY_ZAKLADOW[0]
@@ -80,9 +95,17 @@ class SilnikGry:
         return akcje
 
     def obserwuj(self, id_gracza):
-        return Obserwacja(id_gracza, self.karty_prywatne[id_gracza], self.karta_wspolna,
-                          self.pula, self.wplaty, self.spasowali, self.numer_rundy,
-                          self.historia, self.aktualny)
+        return Obserwacja(
+            id_gracza,
+            self.karty_prywatne[id_gracza],
+            self.karta_wspolna,
+            self.pula,
+            self.wplaty.copy(),
+            self.spasowali.copy(),
+            self.numer_rundy,
+            self.historia.copy(),
+            self.aktualny
+        )
 
     # wykonanie ruchu
     def wykonaj_ruch(self, akcja):
