@@ -183,7 +183,7 @@ def main():
         if not 0 <= miejsce < argumenty.players:
             parser.error(f"miejsce {miejsce} poza zakresem 0..{argumenty.players - 1}")
 
-    # czyli z: "--players 4 --random-seats 0 --mcts-seats 1,2" robi: random_seats = "0", mcts_seats = "1,2", ai_seats = "" 
+    # czyli z: "--players 3 --random-seats 0 --mcts-seats 1,2" robi: random_seats = "0", mcts_seats = "1,2", ai_seats = "" 
     # czyli {0: "losowy", 1: "mcts", 2: "mcts"}.
 
     ziarno = argumenty.ziarno

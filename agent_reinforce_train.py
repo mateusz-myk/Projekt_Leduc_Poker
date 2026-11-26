@@ -40,10 +40,11 @@ def rozegraj_rozdanie(siec, n, ziarno):
 # według tych szans i zapamiętuje, co zagrał i jak bardzo był tego pewny. Ruchy, w których i tak była 
 # tylko jedna możliwość, wykonuje bez zapisywania, bo nie ma w nich żadnego wyboru, więc nie ma się czego uczyć.
 
-# Po końcu rozdania sprawdza, ile każdy gracz wygrał albo przegrał
-# Zwraca te wyniki razem z zapisem decyzji każdego gracza. Potem trening robi z tego prostą rzecz: jeśli gracz
-# wygrał, to wszystkie jego decyzje z tego rozdania stają się trochę bardziej prawdopodobne, a jeśli przegrał,
-# trochę mniej.
+# Po zakończeniu rozdania funkcja zwraca wypłaty graczy oraz zapis ich decyzji.
+# Podczas treningu dla każdej decyzji obliczana jest przewaga,
+# czyli różnica między rzeczywistą wypłatą a wartością baseline'u.
+# Dodatnia przewaga sprzyja zwiększeniu prawdopodobieństwa
+# wybranej akcji, a ujemna jego zmniejszeniu.
 
 def trenuj(liczba_batchy=5000, rozdan_w_batchu=64, lr=1e-3,
     beta=0.01, zakres_graczy=(MIN_GRACZY, MAX_GRACZY),
@@ -93,11 +94,11 @@ def trenuj(liczba_batchy=5000, rozdan_w_batchu=64, lr=1e-3,
 
 # Dla każdej decyzji liczy przewagę = (ile gracz faktycznie wygrał) − (ile sieć się spodziewała wygrać, czyli baseline v).
 # Jeśli wypadło lepiej niż oczekiwano, ta akcja staje się bardziej prawdopodobna, a jeśli gorzej, mniej
-# Osobna strata uczy głowę wartości, żeby jej przewidywania były trafniejsze, a bonus entropii (beta) lekko nagradza niepewność, 
+# Osobna strata uczy głowę wartości, żeby jej przewidywania były trafniejsze, a bonus entropii lekko nagradza niepewność, 
 # żeby sieć nie zaczęła grać zawsze tego samego.
 
 # clip_grad_norm_ ucina zbyt duże gradienty, 
-# Adam robi sam krok, a co 100 batchy kod wypisuje postęp i zapisuje model do reinforce.pt. v.detach()
+# Adam robi sam krok, a co 100 batchy kod wypisuje postęp i zapisuje model
 # w przewadze sprawia, że ta część straty nie psuje głowy wartości, tylko uczy politykę.
 
 if __name__ == "__main__":
